@@ -14,22 +14,19 @@
     },
     "autoload": {
         "psr-4": {
-            "MyComponent\\": "src/"
+            "Keboola\\AppSnowflakeWriterMigrate\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "MyComponent\\Tests\\": "tests/phpunit/"
+            "Keboola\\AppSnowflakeWriterMigrate\\Tests\\": "tests/phpunit/"
         }
     },
     "scripts": {
         "tests-phpunit": "phpunit",
-        "tests-datadir": "datadir-tests",
         "tests": [
-            "@tests-phpunit",
-            "@tests-datadir"
+            "@tests-phpunit"
         ],
-
         "phpstan": "phpstan analyse ./src ./tests --level=max --no-progress -c phpstan.neon",
         "phpcs": "phpcs -n --ignore=vendor --extensions=php .",
         "phpcbf": "phpcbf -n --ignore=vendor --extensions=php .",

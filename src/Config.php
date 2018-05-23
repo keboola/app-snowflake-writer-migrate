@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MyComponent;
+namespace Keboola\AppSnowflakeWriterMigrate;
 
 use Keboola\Component\Config\BaseConfig;
 
