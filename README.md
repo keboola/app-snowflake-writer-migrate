@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.com/keboola/app-snowflake-writer-migrate.svg?branch=master)](https://travis-ci.com/keboola/app-snowflake-writer-migrate)
 
 Application for migrating Snowflake writers between project's and regions.
-It migrates all GoodData writers in source project into project where the application is executed.
+It migrates all Snowflake writers in source project into project where the application is executed.
 
 - It migrates whole Snowflake writer configuration. Ids of configurations are preserved.
 - If writer is provisioned by Keboola new workspace is created in destination project for writer
