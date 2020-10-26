@@ -44,14 +44,17 @@ class Component extends BaseComponent
 
         $sourceProjectComponentsApi = new Components($sourceProjectClient);
 
+        $componentId = $config->getImageParameters()['componentId'];
+
         $migrate = new MigrateWriter(
             $sourceProjectComponentsApi,
             new Components($destProjectClient),
-            new Workspaces($destProjectClient)
+            new Workspaces($destProjectClient),
+            $componentId
         );
         $writers = $sourceProjectComponentsApi->listComponentConfigurations(
             (new ListComponentConfigurationsOptions())
-            ->setComponentId(MigrateWriter::COMPONENT_ID)
+            ->setComponentId($componentId)
         );
         foreach ($writers as $writer) {
             $logger->info(sprintf(
