@@ -17,6 +17,7 @@ class MigrateWriter
 
     public const DEFAULT_COMPONENT_ID = 'keboola.wr-db-snowflake';
 
+    /** @var string $componentId */
     private $componentId;
 
     /** @var Components */
