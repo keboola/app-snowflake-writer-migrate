@@ -15,7 +15,9 @@ class MigrateWriter
         'keboola.snowflakecomputing.com',
     ];
 
-    public const COMPONENT_ID = 'keboola.wr-db-snowflake';
+    public const DEFAULT_COMPONENT_ID = 'keboola.wr-db-snowflake';
+
+    private $componentId;
 
     /** @var Components */
     private $sourceComponentsApi;
@@ -29,17 +31,19 @@ class MigrateWriter
     public function __construct(
         Components $sourceComponentsApi,
         Components $destComponentsApi,
-        Workspaces $destWorkspacesApi
+        Workspaces $destWorkspacesApi,
+        string $componentId = self::DEFAULT_COMPONENT_ID
     ) {
         $this->sourceComponentsApi = $sourceComponentsApi;
         $this->destComponentsApi = $destComponentsApi;
         $this->destWorkspacesApi = $destWorkspacesApi;
+        $this->componentId = $componentId;
     }
 
     public function migrate(string $configurationId): void
     {
         $configuration = $this->sourceComponentsApi->getConfiguration(
-            self::COMPONENT_ID,
+            $this->componentId,
             $configurationId
         );
 
@@ -53,7 +57,7 @@ class MigrateWriter
 
         $newConfiguration = new Configuration();
         $newConfiguration
-            ->setComponentId(self::COMPONENT_ID)
+            ->setComponentId($this->componentId)
             ->setConfigurationId($configuration['id'])
             ->setDescription($configuration['description'])
             ->setName($configuration['name'])

@@ -47,7 +47,8 @@ class Component extends BaseComponent
         $migrate = new MigrateWriter(
             $sourceProjectComponentsApi,
             new Components($destProjectClient),
-            new Workspaces($destProjectClient)
+            new Workspaces($destProjectClient),
+            $config->getImageParameters()['componentId']
         );
         $writers = $sourceProjectComponentsApi->listComponentConfigurations(
             (new ListComponentConfigurationsOptions())
