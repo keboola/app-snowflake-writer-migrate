@@ -6,6 +6,7 @@ namespace Keboola\AppSnowflakeWriterMigrate;
 
 use Keboola\StorageApi\Components;
 use Keboola\StorageApi\Options\Components\Configuration;
+use Keboola\StorageApi\Options\Components\ConfigurationRow;
 use Keboola\StorageApi\Workspaces;
 
 class MigrateWriter
@@ -70,6 +71,23 @@ class MigrateWriter
             ->setState($configuration['state']);
 
         $this->destComponentsApi->addConfiguration($newConfiguration);
+
+        if (!empty($configuration['rows'])) {
+            foreach ($configuration['rows'] as $row) {
+                $newConfigurationRow = new ConfigurationRow($newConfiguration);
+                $newConfigurationRow
+                    ->setRowId($row['id'])
+                    ->setName($row['name'])
+                    ->setConfiguration($row['configuration'])
+                    ->setChangeDescription($row['changeDescription'])
+                    ->setDescription($row['description'])
+                    ->setState($row['state'])
+                    ->setIsDisabled($row['isDisabled']);
+
+                $this->destComponentsApi->addConfigurationRow($newConfigurationRow);
+            }
+        }
+
     }
 
     private function extendConfigurationWithParamsFromWorkspace(array $sourceConfiguration, array $workspace): array
