@@ -87,7 +87,6 @@ class MigrateWriter
                 $this->destComponentsApi->addConfigurationRow($newConfigurationRow);
             }
         }
-
     }
 
     private function extendConfigurationWithParamsFromWorkspace(array $sourceConfiguration, array $workspace): array
