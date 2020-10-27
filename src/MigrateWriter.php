@@ -6,6 +6,7 @@ namespace Keboola\AppSnowflakeWriterMigrate;
 
 use Keboola\StorageApi\Components;
 use Keboola\StorageApi\Options\Components\Configuration;
+use Keboola\StorageApi\Options\Components\ConfigurationRow;
 use Keboola\StorageApi\Workspaces;
 
 class MigrateWriter
@@ -15,10 +16,11 @@ class MigrateWriter
         'keboola.snowflakecomputing.com',
     ];
 
-    public const DEFAULT_COMPONENT_ID = 'keboola.wr-db-snowflake';
+    /** @var string $sourceComponentId */
+    private $sourceComponentId;
 
-    /** @var string $componentId */
-    private $componentId;
+    /** @var string $destinationComponentId */
+    private $destinationComponentId;
 
     /** @var Components */
     private $sourceComponentsApi;
@@ -33,18 +35,20 @@ class MigrateWriter
         Components $sourceComponentsApi,
         Components $destComponentsApi,
         Workspaces $destWorkspacesApi,
-        string $componentId = self::DEFAULT_COMPONENT_ID
+        string $sourceComponentId = Config::AWS_COMPONENT_ID,
+        string $destinationComponentId = Config::AWS_COMPONENT_ID
     ) {
         $this->sourceComponentsApi = $sourceComponentsApi;
         $this->destComponentsApi = $destComponentsApi;
         $this->destWorkspacesApi = $destWorkspacesApi;
-        $this->componentId = $componentId;
+        $this->sourceComponentId = $sourceComponentId;
+        $this->destinationComponentId = $destinationComponentId;
     }
 
     public function migrate(string $configurationId): void
     {
         $configuration = $this->sourceComponentsApi->getConfiguration(
-            $this->componentId,
+            $this->sourceComponentId,
             $configurationId
         );
 
@@ -58,7 +62,7 @@ class MigrateWriter
 
         $newConfiguration = new Configuration();
         $newConfiguration
-            ->setComponentId($this->componentId)
+            ->setComponentId($this->destinationComponentId)
             ->setConfigurationId($configuration['id'])
             ->setDescription($configuration['description'])
             ->setName($configuration['name'])
@@ -67,6 +71,22 @@ class MigrateWriter
             ->setState($configuration['state']);
 
         $this->destComponentsApi->addConfiguration($newConfiguration);
+
+        if (!empty($configuration['rows'])) {
+            foreach ($configuration['rows'] as $row) {
+                $newConfigurationRow = new ConfigurationRow($newConfiguration);
+                $newConfigurationRow
+                    ->setRowId($row['id'])
+                    ->setName($row['name'])
+                    ->setConfiguration($row['configuration'])
+                    ->setChangeDescription($row['changeDescription'])
+                    ->setDescription($row['description'])
+                    ->setState($row['state'])
+                    ->setIsDisabled($row['isDisabled']);
+
+                $this->destComponentsApi->addConfigurationRow($newConfigurationRow);
+            }
+        }
     }
 
     private function extendConfigurationWithParamsFromWorkspace(array $sourceConfiguration, array $workspace): array

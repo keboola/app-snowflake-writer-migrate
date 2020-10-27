@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\AppSnowflakeWriterMigrate\Tests;
 
+use Keboola\AppSnowflakeWriterMigrate\Config;
 use Keboola\AppSnowflakeWriterMigrate\MigrateWriter;
 use Keboola\StorageApi\Options\Components\Configuration;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -62,7 +63,7 @@ class MigrateWriterTest extends TestCase
         $sourceComponentsApi->expects($this->once())
             ->method('getConfiguration')
             ->with(
-                MigrateWriter::DEFAULT_COMPONENT_ID,
+                Config::AWS_COMPONENT_ID,
                 '12'
             )
             ->willReturn($sourceConfiguration);
@@ -74,7 +75,7 @@ class MigrateWriterTest extends TestCase
             ->method('addConfiguration')
             ->with($this->callback(function (Configuration $configuration) use ($sourceConfiguration) {
                 $this->assertEquals($sourceConfiguration['id'], $configuration->getConfigurationId());
-                $this->assertEquals(MigrateWriter::DEFAULT_COMPONENT_ID, $configuration->getComponentId());
+                $this->assertEquals(Config::AWS_COMPONENT_ID, $configuration->getComponentId());
                 $this->assertEquals($sourceConfiguration['name'], $configuration->getName());
                 $this->assertEquals($sourceConfiguration['description'], $configuration->getDescription());
                 $this->assertEquals($sourceConfiguration['configuration'], $configuration->getConfiguration());
@@ -134,7 +135,7 @@ class MigrateWriterTest extends TestCase
         $sourceComponentsApi->expects($this->once())
             ->method('getConfiguration')
             ->with(
-                MigrateWriter::DEFAULT_COMPONENT_ID,
+                Config::AWS_COMPONENT_ID,
                 '12'
             )
             ->willReturn($sourceConfiguration);
@@ -190,7 +191,7 @@ class MigrateWriterTest extends TestCase
                 $expectedNewConfigurationData
             ) {
                 $this->assertEquals($sourceConfiguration['id'], $configuration->getConfigurationId());
-                $this->assertEquals(MigrateWriter::DEFAULT_COMPONENT_ID, $configuration->getComponentId());
+                $this->assertEquals(Config::AWS_COMPONENT_ID, $configuration->getComponentId());
                 $this->assertEquals($sourceConfiguration['name'], $configuration->getName());
                 $this->assertEquals($sourceConfiguration['description'], $configuration->getDescription());
                 $this->assertEquals($expectedNewConfigurationData, $configuration->getConfiguration());
