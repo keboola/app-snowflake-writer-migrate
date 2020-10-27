@@ -24,8 +24,8 @@ class Config extends BaseConfig
 
     public function getSourceComponentId(): string
     {
-        switch ((string) getenv('KBC_TOKEN')) {
-            case 'https://connection.north-europe.azure.keboola.com':
+        switch ((string) getenv('KBC_URL')) {
+            case 'connection.north-europe.azure.keboola.com':
                 return self::AZURE_COMPONENT_ID;
             default:
                 return self::AWS_COMPONENT_ID;
