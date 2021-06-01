@@ -24,7 +24,7 @@ class Config extends BaseConfig
 
     public function getSourceComponentId(): string
     {
-        switch ((string) getenv('KBC_URL')) {
+        switch ($this->getSourceProjectUrl()) {
             case 'connection.north-europe.azure.keboola.com':
                 return self::AZURE_COMPONENT_ID;
             default:
