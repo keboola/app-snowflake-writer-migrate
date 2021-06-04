@@ -24,8 +24,8 @@ class Config extends BaseConfig
 
     public function getSourceComponentId(): string
     {
-        switch ($this->getSourceProjectUrl()) {
-            case 'connection.north-europe.azure.keboola.com':
+        switch (rtrim($this->getSourceProjectUrl(), '/')) {
+            case 'https://connection.north-europe.azure.keboola.com':
                 return self::AZURE_COMPONENT_ID;
             default:
                 return self::AWS_COMPONENT_ID;
