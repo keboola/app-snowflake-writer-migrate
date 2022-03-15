@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Keboola\AppSnowflakeWriterMigrate;
 
+use Exception;
+use GuzzleHttp\Client as GuzzleClient;
 use Keboola\Component\BaseComponent;
+use Keboola\StorageApi\Client;
 use Keboola\StorageApi\ClientException as StorageClientException;
 use Keboola\StorageApi\Client as StorageClient;
 use Keboola\Component\UserException;
@@ -44,10 +47,15 @@ class Component extends BaseComponent
 
         $sourceProjectComponentsApi = new Components($sourceProjectClient);
 
+        $encryptionClient = new GuzzleClient([
+            'base_uri' => $this->getServiceUrl($destProjectClient, 'encryption')
+        ]);
+
         $migrate = new MigrateWriter(
             $sourceProjectComponentsApi,
             new Components($destProjectClient),
             new Workspaces($destProjectClient),
+            $encryptionClient,
             $config->getSourceComponentId(),
             $config->getImageParameters()['componentId']
         );
@@ -85,5 +93,20 @@ class Component extends BaseComponent
     private function getKbcRunId(): string
     {
         return (string) getenv('KBC_RUNID');
+    }
+
+    private function getServiceUrl(Client $client, $serviceId): string
+    {
+        $services = $client->indexAction()['services'];
+
+        $foundServices = array_values(array_filter($services, function ($service) use ($serviceId) {
+            return $service['id'] === $serviceId;
+        }));
+
+        if (empty($foundServices)) {
+            throw new Exception(sprintf('%s service not found', $serviceId));
+        }
+
+        return $foundServices[0]['url'];
     }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Keboola\AppSnowflakeWriterMigrate;
 
+use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Psr7\Request;
 use Keboola\StorageApi\Components;
 use Keboola\StorageApi\Options\Components\Configuration;
 use Keboola\StorageApi\Options\Components\ConfigurationRow;
@@ -31,10 +33,14 @@ class MigrateWriter
     /** @var Workspaces */
     private $destWorkspacesApi;
 
+    /** @var GuzzleClient  */
+    private $encryptionClient;
+
     public function __construct(
         Components $sourceComponentsApi,
         Components $destComponentsApi,
         Workspaces $destWorkspacesApi,
+        GuzzleClient $encryptionClient,
         string $sourceComponentId = Config::AWS_COMPONENT_ID,
         string $destinationComponentId = Config::AWS_COMPONENT_ID
     ) {
@@ -42,6 +48,7 @@ class MigrateWriter
         $this->destComponentsApi = $destComponentsApi;
         $this->destWorkspacesApi = $destWorkspacesApi;
         $this->sourceComponentId = $sourceComponentId;
+        $this->encryptionClient = $encryptionClient;
         $this->destinationComponentId = $destinationComponentId;
     }
 
@@ -91,6 +98,15 @@ class MigrateWriter
 
     private function extendConfigurationWithParamsFromWorkspace(array $sourceConfiguration, array $workspace): array
     {
+        $request = new Request(
+            'POST',
+            sprintf('/encrypt?componentId=%s', $this->destinationComponentId),
+            ['Content-Type' => 'text/plain'],
+            $workspace['connection']['password']
+        );
+
+        $response = $this->encryptionClient->send($request);
+
         return array_replace_recursive(
             $sourceConfiguration,
             [
@@ -100,6 +116,7 @@ class MigrateWriter
                             'host' => $workspace['connection']['host'],
                             'user' => $workspace['connection']['user'],
                             'password' => $workspace['connection']['password'],
+                            '#password' => $response->getBody()->getContents(),
                             'database' => $workspace['connection']['database'],
                             'schema' => $workspace['connection']['schema'],
                             'warehouse' => $workspace['connection']['warehouse'],
