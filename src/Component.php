@@ -48,7 +48,7 @@ class Component extends BaseComponent
         $sourceProjectComponentsApi = new Components($sourceProjectClient);
 
         $encryptionClient = new GuzzleClient([
-            'base_uri' => $this->getServiceUrl($destProjectClient, 'encryption')
+            'base_uri' => $this->getServiceUrl($destProjectClient, 'encryption'),
         ]);
 
         $migrate = new MigrateWriter(
@@ -95,7 +95,7 @@ class Component extends BaseComponent
         return (string) getenv('KBC_RUNID');
     }
 
-    private function getServiceUrl(Client $client, $serviceId): string
+    private function getServiceUrl(Client $client, string $serviceId): string
     {
         $services = $client->indexAction()['services'];
 
