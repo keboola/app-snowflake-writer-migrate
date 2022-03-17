@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Keboola\AppSnowflakeWriterMigrate\Tests;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Response;
 use Keboola\AppSnowflakeWriterMigrate\Config;
 use Keboola\AppSnowflakeWriterMigrate\MigrateWriter;
 use Keboola\StorageApi\Options\Components\Configuration;
@@ -24,6 +26,9 @@ class MigrateWriterTest extends TestCase
 
         /** @var Workspaces|MockObject $destWorkspacesApi */
         $destWorkspacesApi = $this->createMock(Workspaces::class);
+
+        /** @var Client|MockObject $encryptionApi */
+        $encryptionApi = $this->createMock(Client::class);
 
         $sourceConfiguration = [
             'id' => '12',
@@ -82,7 +87,12 @@ class MigrateWriterTest extends TestCase
                 return true;
             }));
 
-        $migrateWriter = new MigrateWriter($sourceComponentsApi, $destComponentsApi, $destWorkspacesApi);
+        $migrateWriter = new MigrateWriter(
+            $sourceComponentsApi,
+            $destComponentsApi,
+            $destWorkspacesApi,
+            $encryptionApi
+        );
         $migrateWriter->migrate('12');
     }
 
@@ -96,6 +106,9 @@ class MigrateWriterTest extends TestCase
 
         /** @var Workspaces|MockObject $destWorkspacesApi */
         $destWorkspacesApi = $this->createMock(Workspaces::class);
+
+        /** @var Client|MockObject $encryptionApi */
+        $encryptionApi = $this->createMock(Client::class);
 
         $sourceConfiguration = [
             'id' => '12',
@@ -179,6 +192,7 @@ class MigrateWriterTest extends TestCase
                     'user' => $createdWorkspace['connection']['user'],
                     'database' => $createdWorkspace['connection']['database'],
                     'password' => $createdWorkspace['connection']['password'],
+                    '#password' => 'encryptValue',
                 ],
                 'tables' => [],
             ],
@@ -198,7 +212,18 @@ class MigrateWriterTest extends TestCase
                 return true;
             }));
 
-        $migrateWriter = new MigrateWriter($sourceComponentsApi, $destComponentsApi, $destWorkspacesApi);
+        $encryptionApi
+            ->expects($this->once())
+            ->method('send')
+            ->willReturn(new Response(200, [], 'encryptValue'))
+        ;
+
+        $migrateWriter = new MigrateWriter(
+            $sourceComponentsApi,
+            $destComponentsApi,
+            $destWorkspacesApi,
+            $encryptionApi
+        );
         $migrateWriter->migrate('12');
     }
 
