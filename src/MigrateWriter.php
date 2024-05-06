@@ -115,7 +115,6 @@ class MigrateWriter
                         'db' => [
                             'host' => $workspace['connection']['host'],
                             'user' => $workspace['connection']['user'],
-                            'password' => $workspace['connection']['password'],
                             '#password' => $response->getBody()->getContents(),
                             'database' => $workspace['connection']['database'],
                             'schema' => $workspace['connection']['schema'],
