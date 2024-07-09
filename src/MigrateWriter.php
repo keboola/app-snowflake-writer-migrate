@@ -71,11 +71,15 @@ class MigrateWriter
         );
 
         if (self::isKeboolaProvisionedWriter($configuration['configuration'])) {
-            $workspace = $this->destWorkspacesApi->createWorkspace();
-            $configuration = $this->extendConfigurationWithParamsFromWorkspace(
-                $configuration,
-                $workspace
-            );
+            if ($this->dryRun === false) {
+                $workspace = $this->destWorkspacesApi->createWorkspace();
+                $configuration = $this->extendConfigurationWithParamsFromWorkspace(
+                    $configuration,
+                    $workspace
+                );
+            } else {
+                $this->logger->info('[dry-run] Create workspace for provisioned Snowflake writer');
+            }
         }
 
         $newConfiguration = new Configuration();
@@ -88,7 +92,15 @@ class MigrateWriter
             ->setConfiguration($configuration['configuration'])
             ->setState($configuration['state']);
 
-        $this->destComponentsApi->addConfiguration($newConfiguration);
+        if ($this->dryRun === false) {
+            $this->destComponentsApi->addConfiguration($newConfiguration);
+        } else {
+            $this->logger->info(sprintf(
+                '[dry-run] Migrate configuration %s (component "%s")',
+                $configuration['id'],
+                $this->destinationComponentId
+            ));
+        }
 
         if (!empty($configuration['rows'])) {
             foreach ($configuration['rows'] as $row) {
@@ -102,7 +114,16 @@ class MigrateWriter
                     ->setState($row['state'])
                     ->setIsDisabled($row['isDisabled']);
 
-                $this->destComponentsApi->addConfigurationRow($newConfigurationRow);
+                if ($this->dryRun === false) {
+                    $this->destComponentsApi->addConfigurationRow($newConfigurationRow);
+                } else {
+                    $this->logger->info(sprintf(
+                        '[dry-run] Migrate row %s of configuration %s (component "%s")',
+                        $row['id'],
+                        $configuration['id'],
+                        $this->destinationComponentId
+                    ));
+                }
             }
         }
     }
@@ -139,13 +160,10 @@ class MigrateWriter
 
     public static function isKeboolaProvisionedWriter(array $configurationData): bool
     {
-        if (!isset($configurationData['parameters']['db']['host'])) {
-            return false;
-        }
-
         return in_array(
-            $configurationData['parameters']['db']['host'],
-            self::KEBOOLA_SNOWFLAKE_HOSTS
+            $configurationData['parameters']['db']['host'] ?? [],
+            self::KEBOOLA_SNOWFLAKE_HOSTS,
+            true
         );
     }
 }
