@@ -56,8 +56,10 @@ class Component extends BaseComponent
             new Components($destProjectClient),
             new Workspaces($destProjectClient),
             $encryptionClient,
+            $logger,
             $config->getSourceComponentId(),
-            $config->getImageParameters()['componentId']
+            $config->getImageParameters()['componentId'],
+            $config->isDryRun()
         );
         $writers = $sourceProjectComponentsApi->listComponentConfigurations(
             (new ListComponentConfigurationsOptions())

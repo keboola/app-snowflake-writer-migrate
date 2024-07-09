@@ -31,4 +31,9 @@ class Config extends BaseConfig
                 return self::AWS_COMPONENT_ID;
         }
     }
+
+    public function isDryRun(): bool
+    {
+        return $this->getValue(['parameters', 'dryRun']);
+    }
 }

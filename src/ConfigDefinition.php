@@ -25,6 +25,9 @@ class ConfigDefinition extends BaseConfigDefinition
                     ->isRequired()
                     ->cannotBeEmpty()
                 ->end()
+                ->booleanNode('dryRun')
+                    ->defaultFalse()
+                ->end()
             ->end()
         ;
         // @formatter:on

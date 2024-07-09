@@ -10,6 +10,7 @@ use Keboola\StorageApi\Components;
 use Keboola\StorageApi\Options\Components\Configuration;
 use Keboola\StorageApi\Options\Components\ConfigurationRow;
 use Keboola\StorageApi\Workspaces;
+use Psr\Log\LoggerInterface;
 
 class MigrateWriter
 {
@@ -36,20 +37,30 @@ class MigrateWriter
     /** @var GuzzleClient  */
     private $encryptionClient;
 
+    /** @var LoggerInterface  */
+    private $logger;
+
+    /** @var bool */
+    private $dryRun;
+
     public function __construct(
         Components $sourceComponentsApi,
         Components $destComponentsApi,
         Workspaces $destWorkspacesApi,
         GuzzleClient $encryptionClient,
+        LoggerInterface $logger,
         string $sourceComponentId = Config::AWS_COMPONENT_ID,
-        string $destinationComponentId = Config::AWS_COMPONENT_ID
+        string $destinationComponentId = Config::AWS_COMPONENT_ID,
+        bool $dryRun = false
     ) {
         $this->sourceComponentsApi = $sourceComponentsApi;
         $this->destComponentsApi = $destComponentsApi;
         $this->destWorkspacesApi = $destWorkspacesApi;
         $this->sourceComponentId = $sourceComponentId;
         $this->encryptionClient = $encryptionClient;
+        $this->logger = $logger;
         $this->destinationComponentId = $destinationComponentId;
+        $this->dryRun = $dryRun;
     }
 
     public function migrate(string $configurationId): void
