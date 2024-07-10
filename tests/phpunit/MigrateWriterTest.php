@@ -9,10 +9,13 @@ use GuzzleHttp\Psr7\Response;
 use Keboola\AppSnowflakeWriterMigrate\Config;
 use Keboola\AppSnowflakeWriterMigrate\MigrateWriter;
 use Keboola\StorageApi\Options\Components\Configuration;
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Keboola\StorageApi\Components;
 use Keboola\StorageApi\Workspaces;
+use Psr\Log\NullLogger;
 
 class MigrateWriterTest extends TestCase
 {
@@ -91,7 +94,8 @@ class MigrateWriterTest extends TestCase
             $sourceComponentsApi,
             $destComponentsApi,
             $destWorkspacesApi,
-            $encryptionApi
+            $encryptionApi,
+            new NullLogger()
         );
         $migrateWriter->migrate('12');
     }
@@ -221,7 +225,8 @@ class MigrateWriterTest extends TestCase
             $sourceComponentsApi,
             $destComponentsApi,
             $destWorkspacesApi,
-            $encryptionApi
+            $encryptionApi,
+            new NullLogger()
         );
         $migrateWriter->migrate('12');
     }
@@ -305,5 +310,109 @@ class MigrateWriterTest extends TestCase
                 true,
             ],
         ];
+    }
+
+    public function testDryRunMode(): void
+    {
+        $logsHandler = new TestHandler();
+        $logger = new Logger('tests', [$logsHandler]);
+
+        /** @var Components|MockObject $sourceComponentsApi */
+        $sourceComponentsApi = $this->createMock(Components::class);
+
+        /** @var Components|MockObject $destComponentsApi */
+        $destComponentsApi = $this->createMock(Components::class);
+
+        /** @var Workspaces|MockObject $destWorkspacesApi */
+        $destWorkspacesApi = $this->createMock(Workspaces::class);
+
+        /** @var Client|MockObject $encryptionApi */
+        $encryptionApi = $this->createMock(Client::class);
+
+        $sourceConfiguration = [
+            'id' => '12',
+            'name' => 'KBL',
+            'description' => 'some desc',
+            'configuration' =>
+                [
+                    'parameters' =>
+                        [
+                            'db' => [
+                                'port' => '443',
+                                'schema' => 'WORKSPACE_755797',
+                                'warehouse' => 'KEBOOLA_PROD',
+                                'driver' => 'snowflake',
+                                'host' => 'keboola.snowflakecomputing.com',
+                                'user' => 'SAPI_WORKSPACE_755797',
+                                'database' => 'SAPI_47',
+                                '#password' => 'secret',
+                            ],
+                            'tables' => [],
+                        ],
+                ],
+            'rowsSortOrder' => [],
+            'rows' => [
+                [
+                    'id' => '1234',
+                    'name' => 'KBL row',
+                    'configuration' => [],
+                    'changeDescription' => '',
+                    'description' => 'some desc',
+                    'state' => [],
+                    'isDisabled' => false,
+                ],
+            ],
+            'state' => [],
+
+        ];
+        $sourceComponentsApi->expects($this->once())
+            ->method('getConfiguration')
+            ->with(
+                Config::AWS_COMPONENT_ID,
+                '12'
+            )
+            ->willReturn($sourceConfiguration);
+
+        $destWorkspacesApi->expects($this->never())->method('createWorkspace');
+        $encryptionApi->expects($this->never())->method('send');
+        $destComponentsApi->expects($this->never())->method('addConfiguration');
+        $destComponentsApi->expects($this->never())->method('addConfigurationRow');
+
+        $migrateWriter = new MigrateWriter(
+            $sourceComponentsApi,
+            $destComponentsApi,
+            $destWorkspacesApi,
+            $encryptionApi,
+            $logger,
+            Config::AWS_COMPONENT_ID,
+            Config::AWS_COMPONENT_ID,
+            true
+        );
+        $migrateWriter->migrate('12');
+
+        $records = $logsHandler->getRecords();
+        $logMessages = array_map(
+            function ($log) {
+                return $log['message'];
+            },
+            $records
+        );
+        $dryRunLogs = array_values(
+            array_filter(
+                $logMessages,
+                function ($message) {
+                    return strpos($message, '[dry-run]') === 0;
+                }
+            )
+        );
+
+        self::assertSame(
+            [
+                '[dry-run] Create workspace for provisioned Snowflake writer',
+                '[dry-run] Migrate configuration 12 (component "keboola.wr-db-snowflake")',
+                '[dry-run] Migrate row 1234 of configuration 12 (component "keboola.wr-db-snowflake")',
+            ],
+            $dryRunLogs
+        );
     }
 }
