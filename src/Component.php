@@ -37,6 +37,7 @@ class Component extends BaseComponent
             'url' => getenv('KBC_URL'),
             'token' => getenv('KBC_TOKEN'),
         ]);
+        $destVerifyToken = $destProjectClient->verifyToken();
 
         $logger->info(sprintf(
             'Migrating Snowflake writers from project %s (%d) at %s',
@@ -51,27 +52,36 @@ class Component extends BaseComponent
             'base_uri' => $this->getServiceUrl($destProjectClient, 'encryption'),
         ]);
 
-        $migrate = new MigrateWriter(
-            $sourceProjectComponentsApi,
-            new Components($destProjectClient),
-            new Workspaces($destProjectClient),
-            $encryptionClient,
-            $logger,
-            $config->getSourceComponentId(),
-            $config->getImageParameters()['componentId'],
-            $config->isDryRun()
-        );
-        $writers = $sourceProjectComponentsApi->listComponentConfigurations(
-            (new ListComponentConfigurationsOptions())
-            ->setComponentId($config->getSourceComponentId())
-        );
-        foreach ($writers as $writer) {
-            $logger->info(sprintf(
-                'Migration of writer %s (%s)',
-                $writer['name'],
-                $writer['id']
-            ));
-            $migrate->migrate($writer['id']);
+        $targetComponentId = $config->getImageParameters()['componentId'];
+        if (in_array($targetComponentId, [Config::GCP_S3_COMPONENT_ID, Config::GCP_COMPONENT_ID])) {
+            $targetComponentId = $destVerifyToken['owner']['defaultBackend'] === 'snowflake' ?
+                Config::GCP_S3_COMPONENT_ID :
+                Config::GCP_COMPONENT_ID;
+        }
+
+        foreach ($config->getSourceComponentId() as $writerComponentId) {
+            $migrate = new MigrateWriter(
+                $sourceProjectComponentsApi,
+                new Components($destProjectClient),
+                new Workspaces($destProjectClient),
+                $encryptionClient,
+                $logger,
+                $writerComponentId,
+                $targetComponentId,
+                $config->isDryRun()
+            );
+            $writers = $sourceProjectComponentsApi->listComponentConfigurations(
+                (new ListComponentConfigurationsOptions())
+                    ->setComponentId($writerComponentId)
+            );
+            foreach ($writers as $writer) {
+                $logger->info(sprintf(
+                    'Migration of writer %s (%s)',
+                    $writer['name'],
+                    $writer['id']
+                ));
+                $migrate->migrate($writer['id']);
+            }
         }
     }
 

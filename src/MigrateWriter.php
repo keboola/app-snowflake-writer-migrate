@@ -17,6 +17,10 @@ class MigrateWriter
     private const KEBOOLA_SNOWFLAKE_HOSTS = [
         'keboola.eu-central-1.snowflakecomputing.com',
         'keboola.snowflakecomputing.com',
+        'keboola.west-europe.azure.snowflakecomputing.com',
+        'rl74503-com_keboola_gcp_us_east4.snowflakecomputing.com',
+        'rl74503-com_keboola_gcp_europe_west3.snowflakecomputing.com',
+        'rl74503-com_keboola_gcp_europe_west3_2.snowflakecomputing.com',
     ];
 
     /** @var string $sourceComponentId */
