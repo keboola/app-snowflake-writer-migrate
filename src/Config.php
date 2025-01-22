@@ -12,6 +12,11 @@ class Config extends BaseConfig
 
     public const AZURE_COMPONENT_ID = 'keboola.wr-snowflake-blob-storage';
 
+    public const GCP_COMPONENT_ID = 'keboola.wr-db-snowflake-gcs';
+
+    public const GCP_S3_COMPONENT_ID = 'keboola.wr-db-snowflake-gcs-s3';
+
+
     public function getSourceProjectUrl(): string
     {
         return $this->getValue(['parameters', 'sourceKbcUrl']);
@@ -22,13 +27,16 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', '#sourceKbcToken']);
     }
 
-    public function getSourceComponentId(): string
+    public function getSourceComponentId(): array
     {
         switch (rtrim($this->getSourceProjectUrl(), '/')) {
             case 'https://connection.north-europe.azure.keboola.com':
-                return self::AZURE_COMPONENT_ID;
+                return [self::AZURE_COMPONENT_ID];
+            case 'https://connection.europe-west3.gcp.keboola.com':
+            case 'https://connection.us-east4.gcp.keboola.com':
+                return [self::GCP_COMPONENT_ID, self::GCP_S3_COMPONENT_ID];
             default:
-                return self::AWS_COMPONENT_ID;
+                return [self::AWS_COMPONENT_ID];
         }
     }
 
