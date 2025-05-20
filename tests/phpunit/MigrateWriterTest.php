@@ -95,7 +95,8 @@ class MigrateWriterTest extends TestCase
             $destComponentsApi,
             $destWorkspacesApi,
             $encryptionApi,
-            new NullLogger()
+            new NullLogger(),
+            ['owner' => ['hasSnowflake' => true]]
         );
         $migrateWriter->migrate('12');
     }
@@ -226,7 +227,8 @@ class MigrateWriterTest extends TestCase
             $destComponentsApi,
             $destWorkspacesApi,
             $encryptionApi,
-            new NullLogger()
+            new NullLogger(),
+            ['owner' => ['hasSnowflake' => true]]
         );
         $migrateWriter->migrate('12');
     }
@@ -384,6 +386,7 @@ class MigrateWriterTest extends TestCase
             $destWorkspacesApi,
             $encryptionApi,
             $logger,
+            ['owner' => ['hasSnowflake' => true]],
             Config::AWS_COMPONENT_ID,
             Config::AWS_COMPONENT_ID,
             true
