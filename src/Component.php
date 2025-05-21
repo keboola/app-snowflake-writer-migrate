@@ -66,6 +66,7 @@ class Component extends BaseComponent
                 new Workspaces($destProjectClient),
                 $encryptionClient,
                 $logger,
+                $destVerifyToken,
                 $writerComponentId,
                 $targetComponentId,
                 $config->isDryRun()

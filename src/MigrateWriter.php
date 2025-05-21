@@ -44,6 +44,9 @@ class MigrateWriter
     /** @var LoggerInterface  */
     private $logger;
 
+    /** @var array */
+    private $destinationToken;
+
     /** @var bool */
     private $dryRun;
 
@@ -53,6 +56,7 @@ class MigrateWriter
         Workspaces $destWorkspacesApi,
         GuzzleClient $encryptionClient,
         LoggerInterface $logger,
+        array $destinationToken,
         string $sourceComponentId = Config::AWS_COMPONENT_ID,
         string $destinationComponentId = Config::AWS_COMPONENT_ID,
         bool $dryRun = false
@@ -65,6 +69,7 @@ class MigrateWriter
         $this->logger = $logger;
         $this->destinationComponentId = $destinationComponentId;
         $this->dryRun = $dryRun;
+        $this->destinationToken = $destinationToken;
     }
 
     public function migrate(string $configurationId): void
@@ -74,7 +79,8 @@ class MigrateWriter
             $configurationId
         );
 
-        if (self::isKeboolaProvisionedWriter($configuration['configuration'])) {
+        if (self::isKeboolaProvisionedWriter($configuration['configuration'])
+            && $this->destinationToken['owner']['hasSnowflake'] === true) {
             if ($this->dryRun === false) {
                 $workspace = $this->destWorkspacesApi->createWorkspace();
                 $configuration = $this->extendConfigurationWithParamsFromWorkspace(
