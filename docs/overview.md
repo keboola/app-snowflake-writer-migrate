@@ -21,8 +21,8 @@ The component does not iterate through all 4 Writer component IDs – the specif
 
 | Source stack URL | Searched source component IDs |
 |---|---|
-| `connection.north-europe.azure.keboola.com` | `keboola.wr-snowflake-blob-storage` |
-| `connection.europe-west3.gcp.keboola.com`, `connection.us-east4.gcp.keboola.com` | `keboola.wr-db-snowflake-gcs`, `keboola.wr-db-snowflake-gcs-s3` |
+| `https://connection.north-europe.azure.keboola.com` | `keboola.wr-snowflake-blob-storage` |
+| `https://connection.europe-west3.gcp.keboola.com`, `https://connection.us-east4.gcp.keboola.com` | `keboola.wr-db-snowflake-gcs`, `keboola.wr-db-snowflake-gcs-s3` |
 | other (default) | `keboola.wr-db-snowflake` |
 
 ### Dynamic target component ID selection (`Component.php`)
@@ -52,7 +52,7 @@ Configuration is copied unchanged (without workspace manipulation). Credentials 
 
 | Parameter | Default | Description |
 |---|---|---|
-| `sourceKbcUrl` | – | URL of the source project |
+| `sourceKbcUrl` | `https://connection.keboola.com` | URL of the source project |
 | `#sourceKbcToken` | – | Storage token of the source project |
 | `dryRun` | `false` | Simulation without actual changes (passed by `app-project-migrate` orchestrator) |
 

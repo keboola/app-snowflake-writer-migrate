@@ -21,7 +21,7 @@ Before running tests, verify that these variables are present in `.env` (or expo
 | `KBC_TOKEN` | Storage token of the destination project |
 | `KBC_RUNID` | Job run ID, set on the SAPI client |
 
-> This component does not have its own integration tests with live credentials – it is tested via datadir functional tests or directly in the Keboola platform. Check that the `.env` file exists in the repo root.
+> This component does not have its own integration tests with live credentials in this repository. Automated tests are run via the PHPUnit suite (see `composer tests` below); only check that the `.env` file exists in the repo root when running code paths that require Keboola platform credentials.
 
 ## Development commands
 
@@ -60,7 +60,7 @@ keboola.wr-db-snowflake-gcs-s3     (GCP with S3)
 
 ## Coding standards
 
-- PHP **7.1+** (`composer.json` requires `"php": "^7.1"`) – unlike other repos, this is NOT PHP 8
+- PHP **7.1+** (`composer.json` requires `"PHP": "^7.1"`) – unlike other repos, this is NOT PHP 8
 - Strict types (`declare(strict_types=1)`)
 - PHPStan level max
 - Keboola coding standard (PSR-12)

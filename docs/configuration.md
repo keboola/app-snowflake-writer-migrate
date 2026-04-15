@@ -14,8 +14,8 @@ Specific Writer component IDs are selected **dynamically based on the source pro
 
 | Source stack URL | Searched source component IDs |
 |---|---|
-| `connection.north-europe.azure.keboola.com` | `keboola.wr-snowflake-blob-storage` |
-| `connection.europe-west3.gcp.keboola.com`, `connection.us-east4.gcp.keboola.com` | `keboola.wr-db-snowflake-gcs`, `keboola.wr-db-snowflake-gcs-s3` |
+| `https://connection.north-europe.azure.keboola.com` | `keboola.wr-snowflake-blob-storage` |
+| `https://connection.europe-west3.gcp.keboola.com`, `https://connection.us-east4.gcp.keboola.com` | `keboola.wr-db-snowflake-gcs`, `keboola.wr-db-snowflake-gcs-s3` |
 | other (default) | `keboola.wr-db-snowflake` |
 
 Target component ID comes from `imageParameters.componentId`. For GCP writers, the destination project's `defaultBackend` further determines (`snowflake` → `keboola.wr-db-snowflake-gcs-s3`, otherwise `keboola.wr-db-snowflake-gcs`).
