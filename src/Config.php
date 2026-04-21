@@ -16,6 +16,12 @@ class Config extends BaseConfig
 
     public const GCP_S3_COMPONENT_ID = 'keboola.wr-db-snowflake-gcs-s3';
 
+    public const SNOWFLAKE_WRITER_COMPONENT_IDS = [
+        self::AWS_COMPONENT_ID,
+        self::AZURE_COMPONENT_ID,
+        self::GCP_COMPONENT_ID,
+        self::GCP_S3_COMPONENT_ID,
+    ];
 
     public function getSourceProjectUrl(): string
     {
@@ -27,17 +33,16 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', '#sourceKbcToken']);
     }
 
-    public function getSourceComponentId(): array
+    /**
+     * @param string[] $availableSourceComponentIds Component ids installed on the source stack.
+     * @return string[]
+     */
+    public function getSourceComponentIds(array $availableSourceComponentIds): array
     {
-        switch (rtrim($this->getSourceProjectUrl(), '/')) {
-            case 'https://connection.north-europe.azure.keboola.com':
-                return [self::AZURE_COMPONENT_ID];
-            case 'https://connection.europe-west3.gcp.keboola.com':
-            case 'https://connection.us-east4.gcp.keboola.com':
-                return [self::GCP_COMPONENT_ID, self::GCP_S3_COMPONENT_ID];
-            default:
-                return [self::AWS_COMPONENT_ID];
-        }
+        return array_values(array_intersect(
+            self::SNOWFLAKE_WRITER_COMPONENT_IDS,
+            $availableSourceComponentIds
+        ));
     }
 
     public function isDryRun(): bool
