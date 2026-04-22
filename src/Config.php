@@ -27,17 +27,24 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', '#sourceKbcToken']);
     }
 
+    /**
+     * Returns all known Snowflake writer component IDs as source candidates.
+     *
+     * Each source stack only has a single Snowflake writer component installed (matching its
+     * file-storage backend), so listing configurations for a component that isn't installed on
+     * the source project simply returns an empty array. Iterating the full set makes the migration
+     * stack-agnostic and removes the need to maintain a hard-coded source URL switch.
+     *
+     * @return string[]
+     */
     public function getSourceComponentId(): array
     {
-        switch (rtrim($this->getSourceProjectUrl(), '/')) {
-            case 'https://connection.north-europe.azure.keboola.com':
-                return [self::AZURE_COMPONENT_ID];
-            case 'https://connection.europe-west3.gcp.keboola.com':
-            case 'https://connection.us-east4.gcp.keboola.com':
-                return [self::GCP_COMPONENT_ID, self::GCP_S3_COMPONENT_ID];
-            default:
-                return [self::AWS_COMPONENT_ID];
-        }
+        return [
+            self::AWS_COMPONENT_ID,
+            self::AZURE_COMPONENT_ID,
+            self::GCP_COMPONENT_ID,
+            self::GCP_S3_COMPONENT_ID,
+        ];
     }
 
     public function isDryRun(): bool
