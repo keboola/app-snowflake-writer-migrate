@@ -52,11 +52,16 @@ class Component extends BaseComponent
             'base_uri' => $this->getServiceUrl($destProjectClient, 'encryption'),
         ]);
 
-        $targetComponentId = $config->getImageParameters()['componentId'];
-        if (in_array($targetComponentId, [Config::GCP_S3_COMPONENT_ID, Config::GCP_COMPONENT_ID])) {
-            $targetComponentId = $destVerifyToken['owner']['defaultBackend'] === 'snowflake' ?
-                Config::GCP_S3_COMPONENT_ID :
-                Config::GCP_COMPONENT_ID;
+        $hardcodedTarget = $config->getHardcodedTargetComponentId();
+        if ($hardcodedTarget !== null) {
+            $targetComponentId = $hardcodedTarget;
+        } else {
+            $targetComponentId = $config->getImageParameters()['componentId'];
+            if (in_array($targetComponentId, [Config::GCP_S3_COMPONENT_ID, Config::GCP_COMPONENT_ID])) {
+                $targetComponentId = $destVerifyToken['owner']['defaultBackend'] === 'snowflake' ?
+                    Config::GCP_S3_COMPONENT_ID :
+                    Config::GCP_COMPONENT_ID;
+            }
         }
 
         foreach ($config->getSourceComponentId() as $writerComponentId) {
