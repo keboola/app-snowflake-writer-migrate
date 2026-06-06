@@ -52,7 +52,16 @@ class Component extends BaseComponent
             'base_uri' => $this->getServiceUrl($destProjectClient, 'encryption'),
         ]);
 
-        $targetComponentId = $config->getImageParameters()['componentId'];
+        $imageParameters = $config->getImageParameters();
+        if (!isset($imageParameters['componentId'])) {
+            $logger->warning(
+                'Skipping Snowflake writer migration: "componentId" is not set in image parameters.'
+                . ' Please configure the component in the Developer Portal.'
+            );
+            return;
+        }
+
+        $targetComponentId = $imageParameters['componentId'];
         if (in_array($targetComponentId, [Config::GCP_S3_COMPONENT_ID, Config::GCP_COMPONENT_ID])) {
             $targetComponentId = $destVerifyToken['owner']['defaultBackend'] === 'snowflake' ?
                 Config::GCP_S3_COMPONENT_ID :
