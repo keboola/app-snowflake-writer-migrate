@@ -59,7 +59,16 @@ class Component extends BaseComponent
                 Config::GCP_COMPONENT_ID;
         }
 
-        foreach ($config->getSourceComponentId() as $writerComponentId) {
+        $sourceComponentIds = $config->getSourceComponentIds(
+            $this->listInstalledComponentIds($sourceProjectClient)
+        );
+
+        if ($sourceComponentIds === []) {
+            $logger->info('No Snowflake writer components installed on source stack, nothing to migrate');
+            return;
+        }
+
+        foreach ($sourceComponentIds as $writerComponentId) {
             $migrate = new MigrateWriter(
                 $sourceProjectComponentsApi,
                 new Components($destProjectClient),
@@ -121,5 +130,19 @@ class Component extends BaseComponent
         }
 
         return $foundServices[0]['url'];
+    }
+
+    /**
+     * @return string[]
+     */
+    private function listInstalledComponentIds(Client $client): array
+    {
+        $components = $client->indexAction()['components'] ?? [];
+        return array_values(array_map(
+            static function (array $component): string {
+                return (string) $component['id'];
+            },
+            $components
+        ));
     }
 }
